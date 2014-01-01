@@ -9,6 +9,7 @@ A set of MATLAB tools useful for working with medical imaging data, especially n
 Requirements:
 -------------
 - uses Jimmy Shen's matlab nifti toolbox, included in `/ext`, which is under a BSD license:
+
 >	Copyright (c) 2009, Jimmy Shen
 >	All rights reserved.
 >
