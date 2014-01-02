@@ -3,7 +3,7 @@ MMIT
 
 Matlab Medical Imaging Toolset
 
-A set of MATLAB tools useful for working with medical imaging data, especially nifti files.
+A set of MATLAB tools useful for working with medical imaging data, especially nifti files. 
 
 
 Requirements:
