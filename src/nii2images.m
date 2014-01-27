@@ -1,13 +1,15 @@
-function selFrames = nii2jpg(niiFile, filepath, varargin)
+function selFrames = nii2images(niiFile, filepath, varargin)
 % NII2JPG - write slices from a nifti file to jpg on disk
-%   selFrames = nii2jpg(niiFile, filepath) - output slices from a nifti
+%   selFrames = nii2images(niiFile, filepath) - output slices from a nifti
 %       files niiFile to disk. Note the format of filepath below, where %i
 %       is a placeholder for a frame
-%   selFrames = nii2jpg(niiFile, filepath)
+%   selFrames = nii2images(niiFile, filepath)
 %
 %   input options:
 %       niiFile - input nifti filename
-%       filepath - input path for output jpgs. format: /path/to/file_%i.jpg
+%       filepath - input path for output images. 
+%           format if single volume: /path/to/file_%i.jpg
+%           format if 4D volume: /path/to/file_%s_%i.jpg
 %        
 %   optional inputs (via param, value pairs):
 %       maskFile - filename of a mask to overlay on image
@@ -18,16 +20,18 @@ function selFrames = nii2jpg(niiFile, filepath, varargin)
 %           if neither slices or padMidSlices is provided, all slices will
 %           be outputed
 %       resample - resample image when output (e.g. 3 for bigger jpgs)
+%       volumes
+%       imwriteopt
 %   
 %   Example:
-%       nii2jpg('/path/to/nifti.nii.gz', '/path/to/output/file_%i.jpg', ...
+%       nii2images('/path/to/nifti.nii.gz', '/path/to/output/file_%i.jpg', ...
 %           'slices', 143:146, 'resample', 3);
 %
 %   Requires: 
 %       NIFTI toolbox and loadNii
 %
 %   See Also:
-%       loadNii, dataset2jpg
+%       loadNii, dataset2images
 %
 %   Author: Adrian Dalca
 %   Last Update: May 2013.
@@ -42,8 +46,10 @@ function selFrames = nii2jpg(niiFile, filepath, varargin)
     isFillOrContour = @(x) strcmp(x, 'fill') || strcmp(x, 'contour');
     p.addParamValue('maskStyle', 'fill', isFillOrContour);
     p.addParamValue('slices', 0, @isnumeric);
+    p.addParamValue('volumes', 0, @isnumeric);
     p.addParamValue('padMidSlices', -1, @isscalar);
     p.addParamValue('resample', 1, @isnumeric);
+    p.addParamValue('imwriteopt', {}, @iscell);
     isIndexOrSequence = @(x) strcmp(x, 'index') || strcmp(x, 'sequence');
     p.addParamValue('outputNameing', 'index', isIndexOrSequence);
     
@@ -80,6 +86,11 @@ function selFrames = nii2jpg(niiFile, filepath, varargin)
     assert(~(any(p.Results.slices > 0) && p.Results.padMidSlices > -1), ...
         'Please only supply one of slices or padMidSlices');
     
+    if any(p.Results.volumes > 0)
+        volumes = p.Results.volumes;
+    else
+        volumes = 1:size(ims, 4);
+    end
     
     if any(p.Results.slices > 0)
         slices = p.Results.slices;
@@ -98,7 +109,7 @@ function selFrames = nii2jpg(niiFile, filepath, varargin)
         
     % go through relevant slices
     iscolor = ndims(ims) == 5;
-    assert(~iscolor || size(ims, 4) == 1);
+%     assert(~iscolor || size(ims, 4) == 1);
     assert(~(iscolor && useMask)); % don't handle mask cases with color images
     
     selFrames = flipdim(permute(ims(:,:,slices, :, :), [2, 1, 3, 4, 5]), 1);
@@ -106,38 +117,54 @@ function selFrames = nii2jpg(niiFile, filepath, varargin)
     if useMask
         maskFrames = masks(:,:,slices);
     end
+    
+    % assume that if more than one volume, we are given %d_%s in the file...
+    if numel(volumes) > 1
+        assert(numel(strfind(filepath, '%s')) == 1);
+    end
+    
     % warning - this won't work, except for orig files. 
-    for i = 1:numel(slices)
-        % get and resize image 
-        im = selFrames(:, :, i, :, :);
-        im = permute(im, [1, 2, 5, 3, 4]);
-        im = imresize(im, p.Results.resample);
+    for v = 1:numel(volumes)
         
-        % if using mask, get and resize mask, and put it back in im
-        if useMask
-            mask = maskFrames(:,:,i);
-            mask = imresize(mask, p.Results.resample, 'nearest');
-            
-            % if just contours.
-            if strcmp(p.Results.maskStyle, 'contour')
-                mask = bwdist(mask) == 1;
-            end
-            
-            % put the mask in the image
-            mixedIm = repmat(im, [1, 1, 3]);
-            im(mask > 0) = mask(mask > 0);
-            mixedIm(:,:,2) = im;
-            im = mixedIm;
-        end
-        
-        % write slice
-        if strcmp(p.Results.outputNameing, 'sequence')
-            name = sprintf(filepath, i);
+        if numel(volumes) > 1
+            thisfilepath = sprintf(filepath, '%d', v);
         else
-            name = sprintf(filepath, slices(i));
+            thisfilepath = filepath;
         end
-        imwrite(im, name, 'Quality', 100);
         
+        
+        for i = 1:numel(slices)
+            % get and resize image 
+            im = selFrames(:, :, i, v, :);
+            im = permute(im, [1, 2, 5, 3, 4]);
+            im = imresize(im, p.Results.resample);
+
+            % if using mask, get and resize mask, and put it back in im
+            if useMask
+                mask = maskFrames(:,:,i);
+                mask = imresize(mask, p.Results.resample, 'nearest');
+
+                % if just contours.
+                if strcmp(p.Results.maskStyle, 'contour')
+                    mask = bwdist(mask) == 1;
+                end
+
+                % put the mask in the image
+                mixedIm = repmat(im, [1, 1, 3]);
+                im(mask > 0) = mask(mask > 0);
+                mixedIm(:,:,2) = im;
+                im = mixedIm;
+            end
+
+            % write slice
+            if strcmp(p.Results.outputNameing, 'sequence')
+                name = sprintf(thisfilepath, i);
+            else
+                name = sprintf(thisfilepath, slices(i));
+            end
+            imwrite(im, name, p.Results.imwriteopt{:}); % 'Quality', 100
+
+        end
     end
     
     
@@ -150,3 +177,4 @@ function t = checkOutName(outName)
     t = ischar(outName) && (numel(strfind(outName, '%i')) == 1 || ...
         numel(strfind(outName, '%d')) == 1);
 end
+
