@@ -64,7 +64,7 @@ function saveNii(nii, filename, tmpFolder, untouch)
         assert(strcmp(newext, '.nii'), 'GZ filename must have a nifti pre-extention (file.nii.gz)');
         
         % if the output die is not the temp dir, don't overwrite files. 
-        if ~strcmp(tmpFolder, tempdir)
+        if ~strcmp(strtrimchr(tmpFolder, filesep), strtrimchr(tempdir, filesep))
             msg = sprintf('%s exists as a file or folder', niiname);
             assert(~(exist(niiname, 'file') > 1), msg);
         end
