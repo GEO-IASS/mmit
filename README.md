@@ -8,6 +8,7 @@ A set of MATLAB tools useful for working with medical imaging data, especially n
 Requirements:
 -------------
 - uses Jimmy Shen's matlab nifti toolbox, included in `/ext`, which is under a BSD license
+- uses [mgt](https://github.com/adalca/mgt), included in `/ext` as a git submodule
 
 License:
 --------
