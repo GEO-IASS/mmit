@@ -65,6 +65,6 @@ function [niiOut, niiSubj, wmSubjInt] = matchWM(subjFile, maskInSubjFile, wmiSrc
     
     % save output file
     if exist('outFile', 'var')
-        saveNii(niiOut, outFile, tempdir, true);
+        saveNii(niiOut, outFile); %, tempdir, true
     end
 end
