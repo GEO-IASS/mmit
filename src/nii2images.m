@@ -1,5 +1,5 @@
 function selFrames = nii2images(niiFile, filepath, varargin)
-% NII2JPG - write slices from a nifti file to jpg on disk
+% NII2IMAGES - write slices from a nifti file to image on disk
 %   selFrames = nii2images(niiFile, filepath) - output slices from a nifti
 %       files niiFile to disk. Note the format of filepath below, where %i
 %       is a placeholder for a frame
@@ -8,8 +8,8 @@ function selFrames = nii2images(niiFile, filepath, varargin)
 %   input options:
 %       niiFile - input nifti filename
 %       filepath - input path for output images. 
-%           format if single volume: /path/to/file_%i.jpg
-%           format if 4D volume: /path/to/file_%s_%i.jpg
+%           format if single volume: /path/to/file_%i.png
+%           format if 4D volume: /path/to/file_%s_%i.png
 %        
 %   optional inputs (via param, value pairs):
 %       maskFile - filename of a mask to overlay on image
@@ -19,12 +19,12 @@ function selFrames = nii2images(niiFile, filepath, varargin)
 %           middle slice (e.g. 5 in a 256^3 image gives 123:133)
 %           if neither slices or padMidSlices is provided, all slices will
 %           be outputed
-%       resample - resample image when output (e.g. 3 for bigger jpgs)
+%       resample - resample image when output (e.g. 3 for bigger images)
 %       volumes
 %       imwriteopt
 %   
 %   Example:
-%       nii2images('/path/to/nifti.nii.gz', '/path/to/output/file_%i.jpg', ...
+%       nii2images('/path/to/nifti.nii.gz', '/path/to/output/file_%i.png', ...
 %           'slices', 143:146, 'resample', 3);
 %
 %   Requires: 
@@ -55,7 +55,7 @@ function selFrames = nii2images(niiFile, filepath, varargin)
     
     p.parse(niiFile, filepath, varargin{:});
     
-    % load nifti file and normalize jpg!
+    % load nifti file and normalize image!
     if ~isstruct(niiFile)
         nii = loadNii(niiFile);
     else
