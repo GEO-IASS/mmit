@@ -3,13 +3,14 @@ function selFrames = nii2images(niiFile, filepath, varargin)
 %   selFrames = nii2images(niiFile, filepath) - output slices from a nifti
 %       files niiFile to disk. Note the format of filepath below, where %i
 %       is a placeholder for a frame
-%   selFrames = nii2images(niiFile, filepath)
 %
 %   input options:
 %       niiFile - input nifti filename
 %       filepath - input path for output images. 
 %           format if single volume: /path/to/file_%i.png
 %           format if 4D volume: /path/to/file_%s_%i.png
+%
+%   selFrames = nii2images(... Param, Value)
 %        
 %   optional inputs (via param, value pairs):
 %       maskFile - filename of a mask to overlay on image
