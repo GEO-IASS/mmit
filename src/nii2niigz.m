@@ -43,7 +43,7 @@ function nii2niigz(folder, recurse, preserve)
     end
     
     % go through each file 
-    cellfun(@fastgzip, names, 'UniformOutput', false);
+    cellfun(@sys.fastgzip, names, 'UniformOutput', false);
     
     % delete if necessary
     if ~preserve

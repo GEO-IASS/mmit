@@ -16,6 +16,9 @@ function isotropicIm = toIsotropic(anisotropicIm, originalVoxDims, isotropicVoxD
 %   Author: Adrian Dalca, www.mit.edu/~adalca
 
 
+    if ~exist('interpMethod', 'var')
+        interpMethod = 'linear';
+    end
 
     % setup the points of interpolation
     ratio = originalVoxDims ./ isotropicVoxDim;
@@ -23,6 +26,11 @@ function isotropicIm = toIsotropic(anisotropicIm, originalVoxDims, isotropicVoxD
     % get the interpolation points in each dimensions
     x = cell(1, ndims(anisotropicIm));
     for i = 1:ndims(anisotropicIm)
+        % note: logic for 
+        % >> nrPts =  round((size(anisotropicIm, i)-1) * ratio(i)) + 1; 
+        % versus
+        % >> nrPts = round(size(anisotropicIm, i) * ratio(i));
+        % if say we want to interpolate 1 : 5 by with ratio of 2, we want 4*2 + 1 points, not 5 * 2;
         x{i} = linspace(1, size(anisotropicIm,i), 1+ round( (size( anisotropicIm, i)-1) * ratio(i)) );
     end
     

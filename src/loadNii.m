@@ -70,7 +70,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
         end
         
         % unzip the file. Note, this might over-write a nifti with the same name.
-        filename = fastgunzip(filename, tmpFolder);
+        filename = sys.fastgunzip(filename, tmpFolder);
         assert(strcmp(filename, niiname), sprintf(...
             'expected behavior failed. \nfilenames:%s\nniiname:     %s\n', filename, niiname));
         

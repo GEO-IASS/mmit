@@ -81,6 +81,6 @@ function saveNii(nii, filename, tmpFolder, untouch)
         if strcmp(pathstr, '')
             pathstr = pwd;
         end
-        fastgzip(niiname, pathstr);
+        sys.fastgzip(niiname, pathstr);
         delete(niiname);
     end
