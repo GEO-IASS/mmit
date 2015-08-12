@@ -36,14 +36,18 @@ function nii = loadNii(filename, tmpFolder, untouch)
         sprintf('unknown extension <%s>. Should be .nii or .gz', ext));
 
     % if tmpFolder is not provided, use the system's temporary folder
+    giventmp = true;
     if ~exist('tmpFolder', 'var')
-        tmpFolder = tempname; %tempdir;
+        % note just using tempdir can fail when doing operations in parallel using the same file.
+        % thus we make a new folder with tempname; 
+        tmpFolder = tempname; 
+        giventmp = false;
     end
       
     fs = filesep;
     if strcmp(tmpFolder(end), fs)
         
-        %Strip the last filesep to be consistent with fileparts behavior
+        % Strip the last filesep to be consistent with fileparts behavior
         tmpFolder = tmpFolder(1:end-1); 
     end
     
@@ -63,8 +67,8 @@ function nii = loadNii(filename, tmpFolder, untouch)
         [~, ~, newext] = fileparts(niiname);
         assert(strcmp(newext, '.nii'), 'GZ filename must have a nifti pre-extention (file.nii.gz)');
         
-        % if the output die is not the temp dir, don't overwrite files. 
-        if ~strcmp(strtrimchr(tmpFolder, filesep), strtrimchr(tempdir, filesep))
+        % if the output dir is not the temp dir, don't overwrite files. 
+        if giventmp && ~strcmp(strtrimchr(tmpFolder, filesep), strtrimchr(tempdir, filesep))
             msg = sprintf('%s exists as a file or folder', niiname);
             assert(~(exist(niiname, 'file') > 1), msg);
         end
@@ -84,6 +88,9 @@ function nii = loadNii(filename, tmpFolder, untouch)
     
         % delete the temp nifti file.
         delete(filename);
+        if giventmp
+            rmdir(tmpFolder);
+        end
     end
 end
 
