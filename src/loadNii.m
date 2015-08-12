@@ -37,7 +37,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
 
     % if tmpFolder is not provided, use the system's temporary folder
     if ~exist('tmpFolder', 'var')
-        tmpFolder = tempdir;
+        tmpFolder = tempname; %tempdir;
     end
       
     fs = filesep;
