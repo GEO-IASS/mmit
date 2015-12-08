@@ -36,12 +36,11 @@ function nii = loadNii(filename, tmpFolder, untouch)
         sprintf('unknown extension <%s>. Should be .nii or .gz', ext));
 
     % if tmpFolder is not provided, use the system's temporary folder
-    giventmp = true;
-    if ~exist('tmpFolder', 'var')
+    giventmp = exist('tmpFolder', 'var');
+    if ~giventmp
         % note just using tempdir can fail when doing operations in parallel using the same file.
         % thus we make a new folder with tempname; 
         tmpFolder = tempname; 
-        giventmp = false;
     end
       
     fs = filesep;
@@ -88,7 +87,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
     
         % delete the temp nifti file.
         delete(filename);
-        if giventmp
+        if ~giventmp
             rmdir(tmpFolder);
         end
     end

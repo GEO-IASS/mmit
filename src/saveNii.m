@@ -34,12 +34,11 @@ function saveNii(nii, filename, tmpFolder, untouch)
         sprintf('unknown extension <%s>. Should be .nii or .gz', ext));
 
     % if tmpFolder is not provided, use the system's temporary folder
-    giventmp = true;
-    if ~exist('tmpFolder', 'var')
+    giventmp = exist('tmpFolder', 'var');
+    if ~giventmp
         % note just using tempdir can fail when doing operations in parallel using the same file.
         % thus we make a new folder with tempname; 
         tmpFolder = tempname; 
-        giventmp = false;
     end
     
     fs = filesep;
@@ -47,6 +46,11 @@ function saveNii(nii, filename, tmpFolder, untouch)
     
         % Strip the last filesep to be consistent with fileparts behavior
         tmpFolder = tmpFolder(1:end-1); 
+    end
+    
+    % make folder if necessary
+    if ~exist(tmpFolder, 'dir')
+        mkdir(tmpFolder);
     end
     
     % if the filename is a nifti, just save it
@@ -78,6 +82,9 @@ function saveNii(nii, filename, tmpFolder, untouch)
             save_fcn(nii, niiname);
         catch e
             warning('Caught error: "%s". Using save_untouch_nii', e.identifier);
+            if isempty(e.identifier)
+                warning(e.message);
+            end
             save_untouch_nii(nii, niiname);
         end
 
@@ -87,7 +94,7 @@ function saveNii(nii, filename, tmpFolder, untouch)
         end
         sys.fastgzip(niiname, pathstr);
         delete(niiname);
-        if giventmp
+        if ~giventmp
             rmdir(tmpFolder);
         end
     end
