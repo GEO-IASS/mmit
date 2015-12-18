@@ -17,7 +17,7 @@ function hrnii = niiResize(niiInputFile, niiOutputFile, varargin)
     vol = vol - min(vol(:));
     
     % resample
-    hrVol = volResize(vol, ..)
+    hrVol = volResize(vol); % unfinished.
     
 	hrVol(hrVol < 0) = 0;
     
