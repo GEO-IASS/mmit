@@ -1,4 +1,4 @@
-function nii = loadNii(filename, tmpFolder, untouch)
+function nii = loadNii(filename, tmpFolder, untouch, hdronly)
 % loadNii load a nifti / gzipped nifti file
 %   nii = loadNii(file) load nii nifti structure from file. 
 %   file should have a .nii or nii.gz extension. Uses the system's tempdir to temporarily
@@ -23,12 +23,23 @@ function nii = loadNii(filename, tmpFolder, untouch)
     if nargin < 3
         untouch = false;
     end
+    if nargin < 4
+        hdronly = false;
+    end
     
     % support loading untouched nifti
     if untouch
-        load_fcn = @load_untouch_nii;
+        if hdronly
+            load_fcn = @load_untouch_nii_hdr;
+        else
+            load_fcn = @load_untouch_nii;
+        end
     else
-        load_fcn = @load_nii;
+        if hdronly
+            load_fcn = @load_nii_hdr;
+        else
+            load_fcn = @load_nii;
+        end
     end
 
     [~, name, ext] = fileparts(filename);
@@ -36,7 +47,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
         sprintf('unknown extension <%s>. Should be .nii or .gz', ext));
 
     % if tmpFolder is not provided, use the system's temporary folder
-    giventmp = exist('tmpFolder', 'var');
+    giventmp = exist('tmpFolder', 'var') && ~isempty(tmpFolder);
     if ~giventmp
         % note just using tempdir can fail when doing operations in parallel using the same file.
         % thus we make a new folder with tempname; 
@@ -52,12 +63,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
     
     % if the filename is a nifti, just load it
     if strcmp(ext, '.nii')
-        try
-            nii = load_fcn(filename);
-        catch e
-            warning('Caught error: "%s". Using load_untouch_nii', e.identifier);
-            nii = load_untouch_nii(filename);
-        end
+        nii = filename2nii(filename, load_fcn, hdronly);
     
     % else, it should be a gz extension. In this case, unzip the .gz file, extract the nifti
     % filename and load that. Make sure the intermediate nifti file isn't already present
@@ -78,12 +84,7 @@ function nii = loadNii(filename, tmpFolder, untouch)
             'expected behavior failed. \nfilenames:%s\nniiname:     %s\n', filename, niiname));
         
         % read in the nifti
-        try
-            nii = load_fcn(filename);
-        catch e
-            warning('Caught error: "%s". Using load_untouch_nii', e.identifier);
-            nii = load_untouch_nii(filename);
-        end
+        nii = filename2nii(filename, load_fcn, hdronly);
     
         % delete the temp nifti file.
         delete(filename);
@@ -93,4 +94,21 @@ function nii = loadNii(filename, tmpFolder, untouch)
     end
 end
 
+function nii = filename2nii(filename, load_fcn, hdronly)
+    try
+        if hdronly
+            nii.hdr = load_fcn(filename);
+        else
+            nii = load_fcn(filename);
+        end
+        
+    catch e
+        warning('Caught error: "%s". Using load_untouch_nii', e.identifier);
+        if hdronly 
+            error('HDR Only Load Failed. Sorry :(');
+        else
+            nii = load_untouch_nii(filename);
+        end
+    end
+end
 
