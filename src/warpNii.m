@@ -12,8 +12,8 @@ function swNii = warpNii(sourceNii, tform, varargin)
 
     % process source
     if ischar(sourceNii), sourceNii = loadNii(sourceNii); end
-    srcDims = sourceNii.hdr.dim.pixdims(2:4);
-    rSource = imref3D(size(sourceNii.img), srcDims(2), srcDims(1), srcDims(3));
+    srcDims = sourceNii.hdr.dime.pixdim(2:4);
+    rSource = imref3d(size(sourceNii.img), srcDims(2), srcDims(1), srcDims(3));
     
     % see if target space is given. if it is, we assume it's a nifti struct or filename
     outViewArgIdx = find(strcmp('OutputView', varargin));
@@ -23,7 +23,7 @@ function swNii = warpNii(sourceNii, tform, varargin)
         
         targetNii = varargin{fi};
         if ischar(targetNii), targetNii = loadNii(targetNii); end
-        tgtDims = targetNii.hdr.dime.pixdims(2:4);
+        tgtDims = targetNii.hdr.dime.pixdim(2:4);
         rFixed = imref3d(size(targetNii.img), tgtDims(2), tgtDims(1), tgtDims(3));
         varargin{fi} = rFixed;
     end
