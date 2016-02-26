@@ -1,5 +1,5 @@
 function [grmag, grdir, gdr, vol] = sliceGradients(niiFile)
-% return the gradients per slice of the given niti. Assumes slices are
+% return the gradients per slice of the given nifti. Assumes slices are
 % taken in the first 2 direction (i.e. slice 1 is (:,:,1);
 %   niiFile is the file or nifti structure of interest.
 %   returns:

@@ -30,7 +30,7 @@ function nii = loadNii(filename, tmpFolder, untouch, hdronly)
     % support loading untouched nifti
     if untouch
         if hdronly
-            load_fcn = @load_untouch_nii_hdr;
+            load_fcn = @load_untouch_header_only;
         else
             load_fcn = @load_untouch_nii;
         end
@@ -105,6 +105,7 @@ function nii = filename2nii(filename, load_fcn, hdronly)
     catch e
         warning('Caught error: "%s". Using load_untouch_nii', e.identifier);
         if hdronly 
+            e
             error('HDR Only Load Failed. Sorry :(');
         else
             nii = load_untouch_nii(filename);
