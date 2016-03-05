@@ -67,4 +67,6 @@ newNiiMask = makeNiiLike(volMask, nii);
 
 % save nifties
 saveNii(newNii, paddedNiiFileName, tempdir, true)
-saveNii(newNiiMask, maskNiiFileName, tempdir, true)
+if ~isempty(maskNiiFileName)
+    saveNii(newNiiMask, maskNiiFileName, tempdir, true)
+end
