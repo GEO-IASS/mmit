@@ -16,8 +16,11 @@ function [vol, mask] = upsampleNii(inNiiFile, outNiiFile, outNiiMaskFile, ...
         givenDims = false;
     end
     
-    
-    nii = loadNii(inNiiFile);
+    if ischar(inNiiFile)
+        nii = loadNii(inNiiFile);
+    else
+        nii = inNiiFile;
+    end
     vol = nii.img;
     
     
